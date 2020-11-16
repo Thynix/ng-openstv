@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import io
 
 
@@ -22,7 +22,13 @@ class Ballot:
         return o.candidates == self.candidates
 
     def __hash__(self) -> int:
-        return hash(self.candidates)
+        return hash(",".join(map(str, self.candidates)))
+
+    def __str__(self) -> str:
+        return str({
+            "candidates": self.candidates,
+            "weight": self.weight,
+        })
 
 
 def __load_ballot(line: str) -> Ballot:
@@ -46,13 +52,16 @@ def __load_ballot(line: str) -> Ballot:
 
 
 # Implements https://www.opavote.com/help/overview#blt-file-format
-# (but not the packed format which only stores unique ballots)
 class BLT:
+    ballots: Dict[Ballot, int]
+    # TODO: Having ballot class weights only used during loading is gross.
+    #  Is there a way to have them in a set? Would require being able to remove
+    #  them from the set.
+    """Ballot weight keyed by ballot; weight in the ballot keys is invalid."""
     withdrawn_numbers: List[int]
 
     def __init__(self, title: str, candidate_names: List[str],
-                 withdrawn_numbers: List[int], seat_count: int,
-                 ballots: List[Ballot]):
+                 withdrawn_numbers: List[int], seat_count: int):
         """
         :param withdrawn_numbers: Candidate numbers that withdrew from the race.
         """
@@ -79,10 +88,16 @@ class BLT:
             raise BLTError("Title is empty")
         self.title = title
 
-        self.ballots = ballots
+        self.ballots = dict()
 
     def save(self, stream: io.TextIOBase):
         pass
+
+    def add_ballot(self, ballot: Ballot):
+        if ballot not in self.ballots:
+            self.ballots[ballot] = ballot.weight
+        else:
+            self.ballots[ballot] += ballot.weight
 
 
 def load_blt(stream: io.TextIOBase):
@@ -138,13 +153,17 @@ def load_blt(stream: io.TextIOBase):
     except EOFError:
         pass
 
-    return BLT(
+    blt = BLT(
         candidate_names=candidate_names,
         title=title,
         withdrawn_numbers=withdrawn_numbers,
         seat_count=seat_count,
-        ballots=ballots,
     )
+
+    for ballot in ballots:
+        blt.add_ballot(ballot)
+
+    return blt
 
 
 def __is_end_ballots_marker(line):
