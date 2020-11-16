@@ -3,35 +3,43 @@ import io
 
 
 class Ballot:
-    def __init__(self, candidates: List[int], weight: int = 1):
+    def __init__(self, candidates: List[int]):
         """
-        :param candidates: Candidate indexes from first to last rank.
-        :param weight: Number of times to apply the ballot. Can be used for storing only unique ballots.
+        :param candidates: Candidate numbers from first to last rank.
         """
         self.candidates = candidates
+
+    def __eq__(self, o: object) -> bool:
+        if not isinstance(o, WeightedBallot):
+            return NotImplemented
+
+        return o.ballot == self.candidates
+
+    def __hash__(self) -> int:
+        return hash(",".join(map(str, self.candidates)))
+
+
+class WeightedBallot:
+    def __init__(self, candidates: List[int], weight: int = 1):
+        """
+        :param candidates: Candidate numbers from first to last rank.
+        :param weight: Number of times to apply the ballot. Can be used for storing only unique ballots.
+        """
+        self.ballot = Ballot(candidates)
 
         if weight < 1:
             raise BLTError(f"Ballot weight must be at least 1; got {weight}")
 
         self.weight = weight
 
-    def __eq__(self, o: object) -> bool:
-        if not isinstance(o, Ballot):
-            return NotImplemented
-
-        return o.candidates == self.candidates
-
-    def __hash__(self) -> int:
-        return hash(",".join(map(str, self.candidates)))
-
     def __str__(self) -> str:
         return str({
-            "candidates": self.candidates,
+            "ballot": self.ballot,
             "weight": self.weight,
         })
 
 
-def __load_ballot(line: str) -> Ballot:
+def __load_ballot(line: str) -> WeightedBallot:
     try:
         values = list(map(int, line.split()))
     except ValueError as e:
@@ -45,7 +53,7 @@ def __load_ballot(line: str) -> Ballot:
     if end_marker != 0:
         raise BLTError(f"Ballot end marker must be 0; got {end_marker}")
 
-    return Ballot(
+    return WeightedBallot(
         candidates=values,
         weight=weight,
     )
@@ -54,10 +62,7 @@ def __load_ballot(line: str) -> Ballot:
 # Implements https://www.opavote.com/help/overview#blt-file-format
 class BLT:
     ballots: Dict[Ballot, int]
-    # TODO: Having ballot class weights only used during loading is gross.
-    #  Is there a way to have them in a set? Would require being able to remove
-    #  them from the set.
-    """Ballot weight keyed by ballot; weight in the ballot keys is invalid."""
+    """Ballot weight keyed by ballot"""
     withdrawn_numbers: List[int]
 
     def __init__(self, title: str, candidate_names: List[str],
@@ -93,11 +98,17 @@ class BLT:
     def save(self, stream: io.TextIOBase):
         pass
 
+    def add_weighted_ballot(self, ballot: WeightedBallot):
+        if ballot not in self.ballots:
+            self.ballots[ballot.ballot] = ballot.weight
+        else:
+            self.ballots[ballot.ballot] += ballot.weight
+
     def add_ballot(self, ballot: Ballot):
         if ballot not in self.ballots:
-            self.ballots[ballot] = ballot.weight
+            self.ballots[ballot] = 1
         else:
-            self.ballots[ballot] += ballot.weight
+            self.ballots[ballot] += 1
 
 
 def load_blt(stream: io.TextIOBase):
@@ -161,7 +172,7 @@ def load_blt(stream: io.TextIOBase):
     )
 
     for ballot in ballots:
-        blt.add_ballot(ballot)
+        blt.add_weighted_ballot(ballot)
 
     return blt
 
