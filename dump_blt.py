@@ -7,4 +7,5 @@ args = parser.parse_args()
 
 with open(args.path, "r") as file:
     blt = load_blt(file)
-    print(blt)
+    for ballot in blt.ballots:
+        print(ballot)

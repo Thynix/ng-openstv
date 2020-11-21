@@ -16,7 +16,12 @@ class Ballot:
         return o.ballot == self.candidates
 
     def __hash__(self) -> int:
-        return hash(",".join(map(str, self.candidates)))
+        return hash(str(self))
+
+    def __str__(self) -> str:
+        return str({
+            "ballot": ",".join(map(str, self.candidates)),
+        })
 
 
 class WeightedBallot:
