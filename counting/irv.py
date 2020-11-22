@@ -11,6 +11,8 @@ class TieError(Exception):
 #       Maybe wait until there's more than one format.
 # TODO: Support more than one seat.
 def get_irv_winner(ballots: List[blt.Ballot]) -> int:
+    # TODO: remove votes for withdrawn candidates
+
     while True:
         votes_per_candidate = __sum_first_choices(ballots)
         winner = __get_winner(votes_per_candidate)

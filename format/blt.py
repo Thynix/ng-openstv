@@ -1,5 +1,4 @@
-from typing import List, Dict
-import io
+from typing import List, Dict, TextIO
 
 
 class Ballot:
@@ -100,9 +99,6 @@ class BLT:
 
         self.ballots = dict()
 
-    def save(self, stream: io.TextIOBase):
-        pass
-
     def add_weighted_ballot(self, ballot: WeightedBallot):
         if ballot not in self.ballots:
             self.ballots[ballot.ballot] = ballot.weight
@@ -116,7 +112,7 @@ class BLT:
             self.ballots[ballot] += 1
 
 
-def load_blt(stream: io.TextIOBase):
+def load_blt(stream: TextIO) -> BLT:
     # The first line has two numbers indicating the number of candidates and
     # the number of seats.
     line_values = __read_next_line(stream).split()
@@ -189,7 +185,7 @@ def __is_end_ballots_marker(line):
 
 # Blank lines, extra white space, and any comments (text after a #) are
 # ignored.
-def __read_next_line(stream: io.TextIOBase) -> str:
+def __read_next_line(stream: TextIO) -> str:
     """
     :return: A non-empty line with comments ignored.
     :raise EOFError:  Trying to read a line when no more are available.

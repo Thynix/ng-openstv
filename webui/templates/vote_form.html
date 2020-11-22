@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>RankMIVote Example Vote</title>
+</head>
+<body>
+<form action="{{form_target}}" method="post">
+    <legend>{{blt.title}}</legend>
+    {% for choice_level in candidate_options %}
+    {% set choice_number = loop.index %}
+    <formset>
+        <legend>Choose #{{choice_number}}</legend>
+        {% for option_id in choice_level %}
+            <input type="radio" id="{{option_id}}" name="{{choice_number}}" value="{{option_id}}">
+            <label for="{{option_id}}">{{blt.candidate_names[loop.index0]}}</label>
+        {% endfor %}
+    </formset>
+    {% endfor %}
+    <button type="submit">Submit Ballot</button>
+</form>
+</body>
+</html>
