@@ -1,5 +1,6 @@
-from collections import defaultdict
-from typing import List, Dict, Union
+from collections import defaultdict, OrderedDict
+from typing import Dict
+from typing import OrderedDict as OrderedDictType
 from format import blt
 
 
@@ -10,14 +11,13 @@ class TieError(Exception):
 # TODO: What generic election results can be supported here?
 #       Maybe wait until there's more than one format.
 # TODO: Support more than one seat.
-def get_irv_winner(ballots: List[blt.Ballot]) -> int:
+def get_irv_winner(ballots: Dict[blt.Ballot, int]) -> OrderedDictType[int, int]:
     # TODO: remove votes for withdrawn candidates
 
     while True:
         votes_per_candidate = __sum_first_choices(ballots)
-        winner = __get_winner(votes_per_candidate)
-        if winner is not None:
-            return winner
+        if __has_winner(votes_per_candidate):
+            return votes_per_candidate
 
         if len(votes_per_candidate) == 2:
             number_one, vote_count = votes_per_candidate.popitem()
@@ -29,31 +29,38 @@ def get_irv_winner(ballots: List[blt.Ballot]) -> int:
         ballots = __remove_loser_votes(ballots, votes_per_candidate)
 
 
-def __sum_first_choices(ballots: List[blt.Ballot]) -> Dict[int, int]:
+def __sum_first_choices(ballots: Dict[blt.Ballot, int]) -> OrderedDictType[int, int]:
     votes_per_candidate = defaultdict(lambda: 0)
-    for ballot in ballots:
+    for ballot, weight in ballots.items():
         if len(ballot.candidates) == 0:
             continue
 
-        votes_per_candidate[ballot.candidates[0]] += 1
+        votes_per_candidate[ballot.candidates[0]] += weight
 
-    return votes_per_candidate
+    sorted_votes = OrderedDict()
+    for candidate_number in sorted(
+            votes_per_candidate.keys(),
+            key=lambda k: votes_per_candidate[k],
+    ):
+        sorted_votes[candidate_number] = votes_per_candidate[candidate_number]
+
+    return sorted_votes
 
 
 # TODO: How to detect ties? No winner with two candidates remaining?
-def __get_winner(choices: Dict[int, int]) -> Union[int, None]:
+def __has_winner(choices: Dict[int, int]) -> bool:
     total_votes = sum(choices.values())
     for candidate_number, votes in choices.items():
         # TODO: Break out victory threshold?
         if votes > (total_votes / 2):
-            return candidate_number
+            return True
 
-    return None
+    return False
 
 
-def __remove_loser_votes(ballots: List[blt.Ballot], votes: Dict[int, int]) -> List[blt.Ballot]:
+def __remove_loser_votes(ballots: Dict[blt.Ballot, int], votes: Dict[int, int]) -> Dict[blt.Ballot, int]:
     loser_candidate = min(votes.keys(), key=lambda c: votes[c])
-    for ballot in ballots:
+    for ballot in ballots.keys():
         if len(ballot.candidates) == 0:
             continue
 

@@ -9,18 +9,16 @@ class Ballot:
         self.candidates = candidates
 
     def __eq__(self, o: object) -> bool:
-        if not isinstance(o, WeightedBallot):
+        if not isinstance(o, Ballot):
             return NotImplemented
 
-        return o.ballot == self.candidates
+        return o.candidates == self.candidates
 
     def __hash__(self) -> int:
         return hash(str(self))
 
     def __str__(self) -> str:
-        return str({
-            "ballot": ",".join(map(str, self.candidates)),
-        })
+        return ",".join(map(str, self.candidates))
 
 
 class WeightedBallot:
