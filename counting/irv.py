@@ -41,6 +41,7 @@ def __sum_first_choices(ballots: Dict[blt.Ballot, int]) -> OrderedDictType[int, 
     for candidate_number in sorted(
             votes_per_candidate.keys(),
             key=lambda k: votes_per_candidate[k],
+            reverse=True,
     ):
         sorted_votes[candidate_number] = votes_per_candidate[candidate_number]
 
