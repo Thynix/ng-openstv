@@ -2,8 +2,8 @@
 
 OpenSTV went closed source and
 [became OpaVote](https://www.opavote.com/openstv). This implements STV
-but is intended for demo usage instead of actual elections. It supports
-(partially) the BTL file format, also used by OpaVote.
+but is intended for demo usage instead of actual elections. It partially
+supports loading the BTL file format used by OpaVote.
 
 ## Requirements
 
@@ -26,19 +26,20 @@ env FLASK_ENV=development FLASK_APP=webui/app.py flask run
 
 ### Deploying
 
-TODO: see aaata-buspage readme
+TODO; see [aaata-buspage](https://github.com/Thynix/aaata-buspage#setup) readme
+for reference with setup on Apache 2. 
 
 ### TODOs
 
-* Add web UI for adding ballots
 * Create template for consistent styling with header and whatnot.
     * See https://flask.palletsprojects.com/en/1.1.x/patterns/templateinheritance/#template-inheritance
-* Support ignoring withdrawn candidates during tabulation.
-* Add undervote and overvote support (just represent as `None`s?) Or don't bother.
-* detect non- https://electionscience.org/library/monotonicity/
-* Maybe a less-dumb BLT variant? BLT could be load-only. Use YAML - https://pypi.org/project/strictyaml/
-    * oh wait just pickle the BLT class
-    * Title
-    * Candidate names
-    * number of seats, then any subsequents numbers are withdrawn candidate numbers
-    * List of ballots: weight; ordered choices
+* Add JS to highlight and disallow submission of:
+    * Multiple votes for the same candidate.
+    * Skipped rankings. (Such as ranking #3 but skipping #2.)
+* Maybe do something to discourage multiple votes?
+  Anything added to the clientside session can be easily cleared, but keeping IPs is a privacy risk.
+  Likely not particularly worth it to bother.
+* Ignore withdrawn candidates during tabulation.
+* Support tabulating elections for multiple seats.
+* Detect non- https://electionscience.org/library/monotonicity/
+* Add BLT undervote and overvote support (just represent as `None`s?) Or don't bother.
