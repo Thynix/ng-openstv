@@ -89,6 +89,10 @@ class BLT:
         for index, candidate_name in enumerate(candidate_names):
             if len(candidate_name.strip()) == 0:
                 raise BLTError(f"Candidate #{index + 1} has an empty name")
+
+        if len(set(candidate_names)) != len(candidate_names):
+            raise BLTError("Candidate names are not unique")
+
         self.candidate_names = candidate_names
 
         if len(title.strip()) == 0:
