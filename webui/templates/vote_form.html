@@ -10,7 +10,7 @@
     {% for candidate_row in candidate_options %}
     {% set candidate_name = blt.candidate_names[loop.index0] %}
     <formset>
-        <legend>Choose ranking for {{candidate_name}}</legend>
+        <legend>Choose ranking for {{candidate_name}}:</legend>
         {% for ranking_number in candidate_row %}
             <input type="radio" id="{{ranking_number}}" name="{{candidate_name}}" value="{{ranking_number}}">
             <label for="{{ranking_number}}">#{{loop.index}}</label>
