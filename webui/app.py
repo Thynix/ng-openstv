@@ -10,8 +10,8 @@ app.config.from_object("config")
 
 blt: BLT = None
 
-# Lists of form element IDs, in candidate order, ordered from first to last
-# preference.
+# Lists of form element IDs for each candidate. Each candidate's elements are
+# ordered from first to last preference.
 candidate_options: List[List[int]] = list()
 
 
@@ -25,11 +25,11 @@ def initialize():
     # TODO: omit withdrawn candidates
     # Compute form options
     global candidate_options
-    for choice_index in range(len(blt.candidate_names)):
-        choice_level = list()
-        candidate_options.append(choice_level)
-        for candidate_number in range(1, len(blt.candidate_names) + 1):
-            choice_level.append(candidate_number)
+    for _ in range(len(blt.candidate_names)):
+        candidate_ranking = list()
+        candidate_options.append(candidate_ranking)
+        for ranking_number in range(1, len(blt.candidate_names) + 1):
+            candidate_ranking.append(ranking_number)
 
     # Write the BLT pickle if it does not already exist
     try:
@@ -52,11 +52,13 @@ def vote_form():
 @app.route("/vote", methods=["POST"])
 def submit_vote():
     choices = list()
-    for choice_number in range(1, len(blt.candidate_names) + 1):
-        if str(choice_number) in request.form:
-            choice = int(request.form[str(choice_number)])
-            if choice not in choices:
-                choices.append(choice)
+    for ranking in range(1, len(blt.candidate_names) + 1):
+        for candidate_index, candidate_name in enumerate(blt.candidate_names):
+            if candidate_name in request.form:
+                choice = int(request.form[candidate_name])
+                if choice == ranking:
+                    choices.append(candidate_index + 1)
+                    break
 
     ballot = Ballot(choices)
     description = ', '.join(map(lambda n: blt.candidate_names[n - 1], choices))

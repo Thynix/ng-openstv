@@ -7,13 +7,13 @@
 <body>
 <form action="{{form_target}}" method="post">
     <legend>{{blt.title}}</legend>
-    {% for choice_level in candidate_options %}
-    {% set choice_number = loop.index %}
+    {% for candidate_row in candidate_options %}
+    {% set candidate_name = blt.candidate_names[loop.index0] %}
     <formset>
-        <legend>Choose #{{choice_number}}</legend>
-        {% for option_id in choice_level %}
-            <input type="radio" id="{{option_id}}" name="{{choice_number}}" value="{{option_id}}">
-            <label for="{{option_id}}">{{blt.candidate_names[loop.index0]}}</label>
+        <legend>Choose ranking for {{candidate_name}}</legend>
+        {% for ranking_number in candidate_row %}
+            <input type="radio" id="{{ranking_number}}" name="{{candidate_name}}" value="{{ranking_number}}">
+            <label for="{{ranking_number}}">#{{loop.index}}</label>
         {% endfor %}
     </formset>
     {% endfor %}
