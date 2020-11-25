@@ -41,5 +41,7 @@ for reference with setup on Apache 2.
   Likely not particularly worth it to bother.
 * Ignore withdrawn candidates during tabulation.
 * Support tabulating elections for multiple seats.
+* https://pypi.org/project/strictyaml/ as an alternative to BLT (load to BLT 
+  class for easier-to-write election descriptions)
 * Detect non- https://electionscience.org/library/monotonicity/
 * Add BLT undervote and overvote support (just represent as `None`s?) Or don't bother.
